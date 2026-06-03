@@ -1,1 +1,1 @@
-# proyecto-tercer-parcail-mortal-kombat-
+# proyecto-tercer-parcaial-mortal-kombat-
