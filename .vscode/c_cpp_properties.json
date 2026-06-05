@@ -6,7 +6,6 @@
       "compilerPath": "cl.exe",
       "includePath": [
         "${workspaceFolder}/**",
-        "${env:INCLUDE}",
         "C:/Users/juans/OneDrive/Escritorio/Mortal Kombat/SFML3/include"
       ],
       "defines": [
