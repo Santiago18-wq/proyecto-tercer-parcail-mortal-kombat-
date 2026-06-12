@@ -9,6 +9,9 @@ CharacterSelect::CharacterSelect()
     p1Ready = false;
     p2Ready = false;
 
+    textures.resize(CHARACTER_COUNT);
+    sprites.reserve(CHARACTER_COUNT);
+
     selectPaths[0] = "assets/imagenes/selec chavo.png";
     selectPaths[1] = "assets/imagenes/selec omniman.png";
     selectPaths[2] = "assets/imagenes/selec kratos.png";
@@ -49,12 +52,12 @@ void CharacterSelect::LoadCharacters()
             continue;
         }
 
-        sprites[i].setTexture(textures[i]);
+        sprites.emplace_back(textures[i]);
 
         auto size = textures[i].getSize();
 
-        float scaleX = 200.f / static_cast<float>(size.x);
-        float scaleY = 200.f / static_cast<float>(size.y);
+        float scaleX = 200.f / (float)size.x;
+        float scaleY = 200.f / (float)size.y;
 
         sprites[i].setScale({scaleX, scaleY});
         sprites[i].setPosition(positions[i]);
@@ -90,9 +93,6 @@ void CharacterSelect::MoveP1(sf::Keyboard::Scancode key)
         case sf::Keyboard::Scancode::S:
             if(p1Index<=1) p1Index+=2;
             break;
-
-        default:
-            break;
     }
 
     UpdateCursorPositions();
@@ -120,9 +120,6 @@ void CharacterSelect::MoveP2(sf::Keyboard::Scancode key)
 
         case sf::Keyboard::Scancode::Down:
             if(p2Index<=1) p2Index+=2;
-            break;
-
-        default:
             break;
     }
 
@@ -190,14 +187,6 @@ void CharacterSelect::Run(sf::RenderWindow& window)
     }
 }
 
-std::string CharacterSelect::GetPlayer1() const
-{
-    return p1Result;
-}
-
-std::string CharacterSelect::GetPlayer2() const
-{
-    return p2Result;
-}
-
+std::string CharacterSelect::GetPlayer1() const { return p1Result; }
+std::string CharacterSelect::GetPlayer2() const { return p2Result; }
 

@@ -8,7 +8,6 @@ class CharacterSelect
 {
 public:
     CharacterSelect();
-
     void Run(sf::RenderWindow& window);
 
     std::string GetPlayer1() const;
@@ -17,9 +16,9 @@ public:
 private:
     static constexpr int CHARACTER_COUNT = 4;
 
-    std::string selectPaths[4];
-    std::string fighterPaths[4];
-    sf::Vector2f positions[4];
+    std::string selectPaths[CHARACTER_COUNT];
+    std::string fighterPaths[CHARACTER_COUNT];
+    sf::Vector2f positions[CHARACTER_COUNT];
 
     std::vector<sf::Texture> textures;
     std::vector<sf::Sprite> sprites;
@@ -44,4 +43,3 @@ private:
     void ConfirmP2();
     void Draw(sf::RenderWindow& window);
 };
-
