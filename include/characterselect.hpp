@@ -7,6 +7,7 @@
 class CharacterSelect
 {
 public:
+
     CharacterSelect();
 
     void Run(sf::RenderWindow& window);
@@ -15,6 +16,8 @@ public:
     std::string GetPlayer2() const;
 
 private:
+
+    static const int CHARACTER_COUNT = 4;
 
     int p1Index;
     int p2Index;
@@ -25,13 +28,20 @@ private:
     std::string p1Result;
     std::string p2Result;
 
-    sf::Texture textures[4];
+    std::string imagePaths[CHARACTER_COUNT];
+
+    sf::Texture textures[CHARACTER_COUNT];
+
     std::vector<sf::Sprite> sprites;
+
+    sf::Vector2f positions[CHARACTER_COUNT];
 
     sf::RectangleShape cursorP1;
     sf::RectangleShape cursorP2;
 
-    sf::Vector2f positions[4];
+    void LoadCharacters();
+
+    void UpdateCursorPositions();
 
     void MoveP1(sf::Keyboard::Scancode key);
     void MoveP2(sf::Keyboard::Scancode key);
