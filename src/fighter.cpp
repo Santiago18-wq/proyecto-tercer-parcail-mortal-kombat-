@@ -1,6 +1,6 @@
 #include "fighter.hpp"
 
-#include <SFML/Graphics.hpp>
+#include <iostream>
 #include <stdexcept>
 
 Fighter::Fighter(float x, float y, const std::string& imagePath)
@@ -24,7 +24,6 @@ Fighter::Fighter(float x, float y, const std::string& imagePath)
     sprite = std::make_unique<sf::Sprite>(*texture);
 
     sprite->setPosition(sf::Vector2f(x, y));
-
     sprite->setScale(sf::Vector2f(0.5f, 0.5f));
 }
 
@@ -32,12 +31,12 @@ Fighter::~Fighter() = default;
 
 void Fighter::MoveLeft()
 {
-    sprite->move(sf::Vector2f(-speed, 0));
+    sprite->move(sf::Vector2f(-speed, 0.f));
 }
 
 void Fighter::MoveRight()
 {
-    sprite->move(sf::Vector2f(speed, 0));
+    sprite->move(sf::Vector2f(speed, 0.f));
 }
 
 void Fighter::Jump()
@@ -52,19 +51,16 @@ void Fighter::Jump()
 void Fighter::Update()
 {
     velocityY += gravity;
-
-    sprite->move(sf::Vector2f(0, velocityY));
+    sprite->move(sf::Vector2f(0.f, velocityY));
 
     if (sprite->getPosition().y >= groundY)
     {
-        sprite->setPosition(
-            sf::Vector2f(
-                sprite->getPosition().x,
-                groundY
-            )
-        );
+        sprite->setPosition(sf::Vector2f(
+            sprite->getPosition().x,
+            groundY
+        ));
 
-        velocityY = 0;
+        velocityY = 0.f;
         isJumping = false;
     }
 }
@@ -97,14 +93,13 @@ void Fighter::FaceRight()
 
 void Fighter::FaceLeft()
 {
-    sprite->setOrigin(
-        sf::Vector2f(
-            static_cast<float>(texture->getSize().x),
-            0.f
-        )
-    );
+    sprite->setOrigin(sf::Vector2f(
+        static_cast<float>(texture->getSize().x),
+        0.f
+    ));
 
     sprite->setScale(sf::Vector2f(-0.5f, 0.5f));
 }
+
 
 
