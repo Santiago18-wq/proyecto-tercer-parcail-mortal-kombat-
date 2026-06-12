@@ -39,4 +39,3 @@ private:
     std::unique_ptr<sf::Texture> texture;
     std::unique_ptr<sf::Sprite> sprite;
 };
-
