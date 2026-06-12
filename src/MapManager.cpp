@@ -8,9 +8,9 @@ std::string MapManager::getRandomMap()
         "assets/mapas/ecenario rengoku.png",
         "assets/mapas/esenario chavo.png",
         "assets/mapas/esenario kratos.png",
-        "assets/mapas/esenario omniman.png"
+        "assets/mapas/esenario viltrum.png"
     };
-    
+
 
     int index = std::rand() % maps.size();
     return maps[index];
