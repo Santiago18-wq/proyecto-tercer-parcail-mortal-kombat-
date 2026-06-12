@@ -167,3 +167,4 @@ std::string CharacterSelect::GetPlayer2() const
 {
     return p2Result;
 }
+
