@@ -15,7 +15,6 @@ CharacterSelect::CharacterSelect()
     selectPaths[2] = "assets/imagenes/selec kratos.png";
     selectPaths[3] = "assets/imagenes/selec rengoku.png";
 
-    // Imágenes que usa Fighter
     fighterPaths[0] = "assets/imagenes/chavo.jpeg";
     fighterPaths[1] = "assets/imagenes/omniman.jpeg";
     fighterPaths[2] = "assets/imagenes/kratos.jpeg";
@@ -44,27 +43,30 @@ CharacterSelect::CharacterSelect()
 void CharacterSelect::LoadCharacters()
 {
     sprites.clear();
-    sprites.reserve(CHARACTER_COUNT);
+    textures.clear();
 
     for(int i = 0; i < CHARACTER_COUNT; i++)
     {
-        if(!textures[i].loadFromFile(selectPaths[i]))
+        sf::Texture tex;
+
+        if(!tex.loadFromFile(selectPaths[i]))
         {
-            std::cout << "No se pudo cargar: "
-                      << selectPaths[i]
-                      << std::endl;
+            std::cout << "No se pudo cargar: " << selectPaths[i] << std::endl;
         }
 
-        sprites.emplace_back(textures[i]);
+        textures.push_back(tex);
 
-        auto size = textures[i].getSize();
+        sf::Sprite sprite(textures.back());
+
+        auto size = textures.back().getSize();
 
         float scaleX = 200.f / size.x;
         float scaleY = 200.f / size.y;
 
-        sprites[i].setScale({scaleX,scaleY});
+        sprite.setScale({scaleX, scaleY});
+        sprite.setPosition(positions[i]);
 
-        sprites[i].setPosition(positions[i]);
+        sprites.push_back(sprite);
     }
 }
 
@@ -82,31 +84,21 @@ void CharacterSelect::MoveP1(sf::Keyboard::Scancode key)
     switch(key)
     {
         case sf::Keyboard::Scancode::A:
-
             if(p1Index==1) p1Index=0;
             if(p1Index==3) p1Index=2;
-
         break;
 
         case sf::Keyboard::Scancode::D:
-
             if(p1Index==0) p1Index=1;
             if(p1Index==2) p1Index=3;
-
         break;
 
         case sf::Keyboard::Scancode::W:
-
-            if(p1Index>=2)
-                p1Index-=2;
-
+            if(p1Index>=2) p1Index-=2;
         break;
 
         case sf::Keyboard::Scancode::S:
-
-            if(p1Index<=1)
-                p1Index+=2;
-
+            if(p1Index<=1) p1Index+=2;
         break;
 
         default:
@@ -124,31 +116,21 @@ void CharacterSelect::MoveP2(sf::Keyboard::Scancode key)
     switch(key)
     {
         case sf::Keyboard::Scancode::Left:
-
             if(p2Index==1) p2Index=0;
             if(p2Index==3) p2Index=2;
-
         break;
 
         case sf::Keyboard::Scancode::Right:
-
             if(p2Index==0) p2Index=1;
             if(p2Index==2) p2Index=3;
-
         break;
 
         case sf::Keyboard::Scancode::Up:
-
-            if(p2Index>=2)
-                p2Index-=2;
-
+            if(p2Index>=2) p2Index-=2;
         break;
 
         case sf::Keyboard::Scancode::Down:
-
-            if(p2Index<=1)
-                p2Index+=2;
-
+            if(p2Index<=1) p2Index+=2;
         break;
 
         default:
@@ -157,14 +139,13 @@ void CharacterSelect::MoveP2(sf::Keyboard::Scancode key)
 
     UpdateCursorPositions();
 }
+
 void CharacterSelect::ConfirmP1()
 {
     if(p1Index == p2Index && p2Ready)
         return;
 
     p1Ready = true;
-
-    // Guarda la imagen que utilizará Fighter
     p1Result = fighterPaths[p1Index];
 }
 
@@ -174,8 +155,6 @@ void CharacterSelect::ConfirmP2()
         return;
 
     p2Ready = true;
-
-    // Guarda la imagen que utilizará Fighter
     p2Result = fighterPaths[p2Index];
 }
 
