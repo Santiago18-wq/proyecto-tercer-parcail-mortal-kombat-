@@ -28,7 +28,11 @@ private:
     std::string p1Result;
     std::string p2Result;
 
-    std::string imagePaths[CHARACTER_COUNT];
+    // Imágenes que aparecen en la selección
+    std::string selectPaths[CHARACTER_COUNT];
+
+    // Imágenes que usará Fighter
+    std::string fighterPaths[CHARACTER_COUNT];
 
     sf::Texture textures[CHARACTER_COUNT];
 
