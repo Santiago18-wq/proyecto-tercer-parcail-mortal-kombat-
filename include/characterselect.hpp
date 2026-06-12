@@ -1,39 +1,46 @@
 #pragma once
 
-#include <string>
-#include <memory>
 #include <SFML/Graphics.hpp>
+#include <string>
+#include <vector>
 
-class Fighter
+class CharacterSelect
 {
 public:
-    Fighter(float x, float y, const std::string& imagePath);
-    ~Fighter();
+    CharacterSelect();
 
-    void MoveLeft();
-    void MoveRight();
-    void Jump();
-    void Update();
+    void Run(sf::RenderWindow& window);
 
-    const sf::Sprite& GetSprite() const;
-
-    void SetPosition(float x, float y);
-    sf::Vector2f GetPosition() const;
-    sf::FloatRect GetBounds() const;
-
-    void FaceRight();
-    void FaceLeft();
+    std::string GetPlayer1() const;
+    std::string GetPlayer2() const;
 
 private:
-    float speed;
+    static constexpr int CHARACTER_COUNT = 4;
 
-    float velocityY;
-    float gravity;
+    std::string selectPaths[4];
+    std::string fighterPaths[4];
+    sf::Vector2f positions[4];
 
-    bool isJumping;
+    std::vector<sf::Texture> textures;
+    std::vector<sf::Sprite> sprites;
 
-    float groundY;
+    sf::RectangleShape cursorP1;
+    sf::RectangleShape cursorP2;
 
-    std::unique_ptr<sf::Texture> texture;
-    std::unique_ptr<sf::Sprite> sprite;
+    int p1Index;
+    int p2Index;
+
+    bool p1Ready;
+    bool p2Ready;
+
+    std::string p1Result;
+    std::string p2Result;
+
+    void LoadCharacters();
+    void UpdateCursorPositions();
+    void MoveP1(sf::Keyboard::Scancode key);
+    void MoveP2(sf::Keyboard::Scancode key);
+    void ConfirmP1();
+    void ConfirmP2();
+    void Draw(sf::RenderWindow& window);
 };
