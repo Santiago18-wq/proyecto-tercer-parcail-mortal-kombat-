@@ -10,8 +10,10 @@ private:
     sf::Sprite sprite;
     std::string currentMap;
 
+    void setupSprite();
+
 public:
-    MapManager(); // 👈 ESTO ES LO QUE FALTA O ESTÁ MAL
+    MapManager();
 
     void loadRandomMap();
     void draw(sf::RenderWindow& window);
