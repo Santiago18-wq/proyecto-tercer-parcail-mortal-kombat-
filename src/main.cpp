@@ -144,16 +144,7 @@ int main()
             auto p1Bounds = player1.GetBounds();
             auto p2Bounds = player2.GetBounds();
 
-            auto centro1 = player1.GetBounds();
-auto centro2 = player2.GetBounds();
-
-float distancia =
-    std::abs(
-        (centro1.position.x + centro1.size.x / 2.f) -
-        (centro2.position.x + centro2.size.x / 2.f)
-    );
-
-bool tocando = distancia <= 180.f;
+            bool tocando = p1Bounds.findIntersection(p2Bounds).has_value();
 
 
             // F
