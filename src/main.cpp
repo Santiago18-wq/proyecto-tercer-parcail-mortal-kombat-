@@ -54,7 +54,8 @@ int main()
 
     // 🔥 MAPA ALEATORIO
     MapManager mapManager;
-
+    mapManager.loadRandomMap();
+    
     Fighter player1(
         200,
         500,
