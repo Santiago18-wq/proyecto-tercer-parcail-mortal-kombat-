@@ -106,14 +106,14 @@ int main()
             if(event->is<sf::Event::Closed>())
                 window.close();
                 
-                if (const auto* key = event->getIf<sf::Event::KeyPressed>())
+                if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
 {
     std::cout << "Tecla presionada\n";
 
-    if (key->scancode == sf::Keyboard::Scancode::F)
+    if (keyPressed->scancode == sf::Keyboard::Scancode::F)
         std::cout << "F detectada\n";
 
-    if (key->scancode == sf::Keyboard::Scancode::RControl)
+    if (keyPressed->scancode == sf::Keyboard::Scancode::RControl)
         std::cout << "Right Ctrl detectada\n";
 }
         }
@@ -146,38 +146,23 @@ int main()
 
             // F
 
-if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
-{
-    std::cout << "F PRESIONADA\n";
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
+            {
+                if (tocando)
+                {
+                    player2.TakeDamage(10);
+                    std::cout << "P1 HIT -> vida2: " << player2.GetHealth() << "\n";
+                }
+            }
 
-    if(tocando)
-    {
-        std::cout << "TOCANDO OK\n";
-        vida2 -= 10;
-        std::cout << "P1 HIT -> vida2: " << vida2 << "\n";
-    }
-}
-
-else
-{
-    golpeP1 = false;
-}
-
-if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl))
-{
-    std::cout << "RCTRL PRESIONADO\n";
-
-    if(tocando)
-    {
-        std::cout << "TOCANDO OK (P2)\n";
-        vida1 -= 10;
-        std::cout << "P2 HIT -> vida1: " << vida1 << "\n";
-    }
-}
-else
-{
-    golpeP2 = false;
-}
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl))
+            {
+                if (tocando)
+                {
+                    player1.TakeDamage(10);
+                    std::cout << "P2 HIT -> vida1: " << player1.GetHealth() << "\n";
+                }
+            }
         }
 
         player1.Update();
