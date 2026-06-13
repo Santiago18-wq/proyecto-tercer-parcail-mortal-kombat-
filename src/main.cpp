@@ -141,18 +141,14 @@ int main()
 
         if(!peleaTerminada)
         {
-            auto p1Bounds = player1.GetBounds();
-            auto p2Bounds = player2.GetBounds();
-
-            bool tocando = p1Bounds.findIntersection(p2Bounds).has_value();
+            float dx = player1.GetPosition().x - player2.GetPosition().x;
+bool tocando = std::abs(dx) < 300.f;
 
 
             // F
 
 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
 {
-    golpeP1 = true;
-
     std::cout << "F PRESIONADA\n";
 
     if(tocando)
@@ -162,6 +158,7 @@ if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
         std::cout << "P1 HIT -> vida2: " << vida2 << "\n";
     }
 }
+
 else
 {
     golpeP1 = false;
@@ -169,8 +166,6 @@ else
 
 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl))
 {
-    golpeP2 = true;
-
     std::cout << "RCTRL PRESIONADO\n";
 
     if(tocando)
