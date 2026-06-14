@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <stdexcept>
+#include <vector>
 
 Fighter::Fighter(float x, float y, const std::string& imagePath)
 {
@@ -26,9 +27,42 @@ Fighter::Fighter(float x, float y, const std::string& imagePath)
 
     sprite = std::make_unique<sf::Sprite>(*texture);
 
-    sprite->setPosition(sf::Vector2f(x, y));
+//=============================
+// CONFIGURACIÓN DE ANIMACIONES
+//=============================
 
-    sprite->setScale(sf::Vector2f(0.5f, 0.5f));
+currentAnimation = IDLE;
+
+currentFrame = 0;
+
+frameTime = 0.15f;
+
+//--------------------------------
+// IDLE
+//--------------------------------
+
+// Estos valores los ajustaremos cuando
+// terminemos de medir el spritesheet.
+
+idleFrames.push_back(sf::IntRect(
+    sf::Vector2i(0, 0),
+    sf::Vector2i(170, 220)
+));
+
+idleFrames.push_back(sf::IntRect(
+    sf::Vector2i(170, 0),
+    sf::Vector2i(170, 220)
+));
+
+//--------------------------------
+// Al iniciar mostramos el primer frame
+//--------------------------------
+
+sprite->setTextureRect(idleFrames[0]);
+
+sprite->setPosition(sf::Vector2f(x, y));
+
+sprite->setScale(sf::Vector2f(0.5f,0.5f));
 }
 
 Fighter::~Fighter() = default;
@@ -69,6 +103,40 @@ void Fighter::Update()
 
         velocityY = 0;
         isJumping = false;
+    }
+
+    UpdateAnimation();
+}
+
+//====================================================
+// PEGA ESTA FUNCIÓN AQUÍ
+//====================================================
+
+void Fighter::UpdateAnimation()
+{
+    if (animationClock.getElapsedTime().asSeconds() < frameTime)
+        return;
+
+    animationClock.restart();
+
+    switch (currentAnimation)
+    {
+        case IDLE:
+        {
+            currentFrame++;
+
+            if (currentFrame >= idleFrames.size())
+                currentFrame = 0;
+
+            sprite->setTextureRect(idleFrames[currentFrame]);
+            break;
+        }
+
+        case WALK:
+            break;
+
+        case ATTACK:
+            break;
     }
 }
 
@@ -134,6 +202,24 @@ void Fighter::StartAttack()
     attacking = true;
 }
 
+
+void Fighter::SetIdle()
+{
+    currentAnimation = IDLE;
+    currentFrame = 0;
+}
+
+void Fighter::SetWalk()
+{
+    currentAnimation = WALK;
+    currentFrame = 0;
+}
+
+void Fighter::SetAttack()
+{
+    currentAnimation = ATTACK;
+    currentFrame = 0;
+}
 void Fighter::StopAttack()
 {
     attacking = false;

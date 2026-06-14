@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 
 class Fighter
 {
@@ -26,25 +27,24 @@ public:
     void FaceRight();
     void FaceLeft();
 
-    // ==========================
-    // VIDA Y GOLPES (NUEVO)
-    // ==========================
-
-    // Devuelve la vida actual (0-100)
+    // Vida
     int GetHealth() const;
-
-    // Resta vida
     void TakeDamage(int damage);
-
-    // Saber si sigue vivo
     bool IsAlive() const;
 
-    // Estado de ataque
+    // Ataque
     void StartAttack();
     void StopAttack();
     bool IsAttacking() const;
 
+    // ====== NUEVO ======
+    void SetIdle();
+    void SetWalk();
+    void SetAttack();
+    // ===================
+
 private:
+
     // Movimiento
     float speed;
     float velocityY;
@@ -61,5 +61,30 @@ private:
     // Imagen
     std::unique_ptr<sf::Texture> texture;
     std::unique_ptr<sf::Sprite> sprite;
-};
 
+    //=================================================
+    //              SISTEMA DE ANIMACIÓN
+    //=================================================
+
+    enum AnimationState
+    {
+        IDLE,
+        WALK,
+        ATTACK
+    };
+
+    AnimationState currentAnimation;
+
+    std::vector<sf::IntRect> idleFrames;
+    std::vector<sf::IntRect> walkFrames;
+    std::vector<sf::IntRect> attackFrames;
+
+    int currentFrame;
+
+    sf::Clock animationClock;
+
+    float frameTime;
+
+    void UpdateAnimation();
+
+};
