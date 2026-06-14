@@ -249,8 +249,10 @@ if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::RControl))
             tiempo = 0;
 
         if(tiempo == 0 || player1.GetHealth() <= 0 || player2.GetHealth() <= 0)
+           { 
             peleaTerminada = true;
             fightMusic.stop();
+             }
         textoVida1.setString("P1: " + std::to_string(player1.GetHealth()));
         textoVida2.setString("P2: " + std::to_string(player2.GetHealth()));
         textoTiempo.setString(std::to_string(tiempo));
