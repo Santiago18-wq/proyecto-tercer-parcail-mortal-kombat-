@@ -8,7 +8,7 @@ Fighter::Fighter(float x, float y, const std::string& imagePath)
 {
     speed = 1.5f;
 
-    velocityY = 0.0f;
+    velocityY = 0.02f;
     gravity = 0.15f;
 
     isJumping = false;
