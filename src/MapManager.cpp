@@ -14,7 +14,11 @@ void MapManager::loadRandomMap()
     // Lista de tus escenarios disponibles
     std::vector<std::string> maps =
     {
-        "assets/imagenes/esenario viltrum.png"
+        "assets/imagenes/esenario viltrum.png",
+        "assets/imagenes/esenario chavo.png",
+        "assets/imagenes/ecenario rengoku.png",
+        "assets/imagenes/esenario kratos.png"
+
         // Si agregas más en el futuro, hazlo aquí separados por comas:
         // "assets/imagenes/mapa2.png",
         // "assets/imagenes/mapa3.png"
