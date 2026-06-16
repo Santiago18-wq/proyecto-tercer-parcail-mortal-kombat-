@@ -8,6 +8,8 @@
 
 class Fighter {
 public:
+void Move(float dx);
+void SetPosition(sf::Vector2f pos);
     enum AnimationState { IDLE, WALK, JUMP, ATTACK };
 
     Fighter(float x, float y, const std::string& characterName);

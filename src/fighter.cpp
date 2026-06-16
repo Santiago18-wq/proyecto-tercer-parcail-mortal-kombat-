@@ -1,6 +1,8 @@
 #include "fighter.hpp"
 #include <iostream>
 #include <cmath>
+#include <algorithm>
+#include <SFML/Graphics.hpp>
 
 Fighter::Fighter(float x, float y, const std::string& characterName)
 {
@@ -8,155 +10,169 @@ Fighter::Fighter(float x, float y, const std::string& characterName)
     currentAnimation = IDLE;
     currentFrame = 0;
     animationTimer = 0.f;
-    name = characterName;
+    
+    // Convertir el nombre a minúsculas para evitar errores de mayúsculas/minúsculas en main.cpp
+    std::string lowerName = characterName;
+    std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+    name = lowerName;
     
     facingRight = true;
     attacking = false;
     velocityY = 0.f;
     isGrounded = true;
 
-    // RUTA REAL DE TUS CARPETAS (Sin /imagenes/)
-    std::string basePath = "assets/sprites/" + characterName;
+    // RUTA REAL CORREGIDA: Apunta directo a assets/sprites/ sin carpetas fantasmas
+    std::string basePath = "assets/sprites/" + name;
 
-    if (characterName == "chavo")
+    // BLINDAJE ANTI-MAYÚSCULAS: Validamos tanto chavo/Chavo como kratos/Kratos
+    if (name == "chavo")
     {
         LoadAnimationFolder(basePath, "chavo_basico_1", idleTextures);
         LoadAnimationFolder(basePath, "chavo_caminar", walkTextures);
         LoadAnimationFolder(basePath, "chavo_salto", jumpTextures);
-        LoadAnimationFolder(basePath, "chavo_dash", attackTextures); // Archivo real en tu disco
+        LoadAnimationFolder(basePath, "chavo_dash", attackTextures); 
     }
-    else // kratos
+    else // Si es kratos, Kratos o cualquier otro parámetro por defecto
     {
-        LoadAnimationFolder(basePath, "Kratos_ataque_1", idleTextures); // Tu imagen base de Kratos
-        LoadAnimationFolder(basePath, "Kratos_caminar", walkTextures);
-        LoadAnimationFolder(basePath, "Kratos_salto", jumpTextures);
-        LoadAnimationFolder(basePath, "Kratos_dash", attackTextures);
-    }
-
-    if (!idleTextures.empty() && idleTextures[0])
-    {
-        sprite = std::make_unique<sf::Sprite>(*idleTextures[0]);
-        sprite->setTextureRect(sf::IntRect({0, 0}, {128, 150}));
-    }
-    else
-    {
-        static sf::Texture dummyTexture;
-        sprite = std::make_unique<sf::Sprite>(dummyTexture);
+        name = "kratos"; // Aseguramos consistencia interna
+        LoadAnimationFolder(basePath, "kratos_ataque_1", idleTextures);
+        LoadAnimationFolder(basePath, "kratos_caminar", walkTextures);
+        LoadAnimationFolder(basePath, "kratos_salto", jumpTextures);
+        LoadAnimationFolder(basePath, "kratos_dash", attackTextures);
     }
 
-    sprite->setPosition({x, y});
-}
-
-void Fighter::LoadAnimationFolder(const std::string& basePath, const std::string& animName, std::vector<std::unique_ptr<sf::Texture>>& container)
-{
-    std::string fullPath = basePath + "/" + animName + ".png";
-    auto texture = std::make_unique<sf::Texture>();
-    
-    if (texture->loadFromFile(fullPath))
+    // Si falló la carga por culpa de una ruta de carpeta externa, creamos texturas sólidas para que no se rompa el motor gráfico
+    if (idleTextures.empty() || !idleTextures[0] || idleTextures[0]->getSize().x == 0)
     {
-        container.push_back(std::move(texture));
-    }
-    else
-    {
-        std::cout << "ERROR FATAL: No existe el archivo: " << fullPath << "\n";
-        // Textura de emergencia para que el juego NUNCA se divida entre 0
-        auto fallback = std::make_unique<sf::Texture>();
+        std::cout << "Advertencia: Usando textura de respaldo para evitar parpadeos descontrolados.\n";
+        auto fallbackTex = std::make_unique<sf::Texture>();
         sf::Image img;
-        img.resize({128, 150}, sf::Color::Magenta);
-        fallback->loadFromImage(img);
-        container.push_back(std::move(fallback));
+        img.resize({128, 150}, sf::Color::Red);
+        fallbackTex->loadFromImage(img);
+        idleTextures.clear();
+        idleTextures.push_back(std::move(fallbackTex));
     }
+
+    sprite = std::make_unique<sf::Sprite>(*idleTextures[0]);
+    sprite->setTextureRect(sf::IntRect({0, 0}, {128, 150}));
+    sprite->setPosition({x, y});
+    sprite->setOrigin({64.f, 75.f}); // 128x150 sprites
+}
+void Fighter::LoadAnimationFolder(
+    const std::string& basePath,
+    const std::string& animName,
+    std::vector<std::unique_ptr<sf::Texture>>& container)
+{
+    auto tex = std::make_unique<sf::Texture>();
+
+    std::string ruta = basePath + "/" + animName + ".png";
+
+    if (!tex->loadFromFile(ruta))
+    {
+        std::cout << "No se pudo cargar: " << ruta << std::endl;
+        return;
+    }
+
+    container.push_back(std::move(tex));
 }
 
 void Fighter::Update()
 {
-    // Gravedad física para que caigan si saltan
-    if (sprite)
+    // ----------------- GRAVEDAD -----------------
+
+    // ----------------- GRAVEDAD -----------------
+if (sprite)
+{
+    if (currentAnimation != ATTACK)
     {
-        sf::Vector2f pos = sprite->getPosition();
-        if (pos.y < 450.f) 
+        if (!isGrounded)
         {
             velocityY += 0.6f;
-            isGrounded = false;
+            sprite->move({0.f, velocityY});
+
+            if (sprite->getPosition().y >= 500.f)
+            {
+                sprite->setPosition({sprite->getPosition().x, 500.f});
+                velocityY = 0.f;
+                isGrounded = true;
+
+                if (currentAnimation == JUMP)
+                    currentAnimation = IDLE;
+            }
         }
-        else
-        {
-            pos.y = 450.f;
-            velocityY = 0.f;
-            isGrounded = true;
-            if (currentAnimation == JUMP) currentAnimation = IDLE;
-        }
-        sprite->setPosition(pos);
-        sprite->move({0.f, velocityY});
     }
+}
+
+    // ----------------- SELECCIONAR ANIMACION -----------------
 
     sf::Texture* currentTex = nullptr;
     int totalFrames = 1;
-    int frameWidth = 128; // Ancho estricto por cuadro para evitar deformaciones
 
-    if (currentAnimation == IDLE && !idleTextures.empty()) {
+    if (currentAnimation == IDLE && !idleTextures.empty())
+    {
         currentTex = idleTextures[0].get();
         totalFrames = (name == "chavo") ? 1 : 8;
     }
-    else if (currentAnimation == WALK && !walkTextures.empty()) {
+    else if (currentAnimation == WALK && !walkTextures.empty())
+    {
         currentTex = walkTextures[0].get();
         totalFrames = (name == "chavo") ? 13 : 8;
     }
-    else if (currentAnimation == JUMP && !jumpTextures.empty()) {
+    else if (currentAnimation == JUMP && !jumpTextures.empty())
+    {
         currentTex = jumpTextures[0].get();
-        totalFrames = 1;
+        totalFrames = 10;
     }
-    else if (currentAnimation == ATTACK && !attackTextures.empty()) {
+    else if (currentAnimation == ATTACK && !attackTextures.empty())
+    {
         currentTex = attackTextures[0].get();
         totalFrames = (name == "chavo") ? 4 : 8;
     }
 
-    if (currentTex && sprite && currentTex->getSize().x > 0)
+    if (!currentTex)
+        return;
+
+    sprite->setTexture(*currentTex);
+
+    int frameWidth = currentTex->getSize().x / totalFrames;
+    int frameHeight = currentTex->getSize().y;
+
+    animationTimer += 0.016f;
+if (animationTimer >= 0.1f)
     {
-        sprite->setTexture(*currentTex);
+        animationTimer = 0.f;
 
-        // Control de velocidad de fotogramas independiente
-        animationTimer += (name == "chavo") ? 0.15f : 0.08f; 
-        if (animationTimer >= 1.f)
+        currentFrame++;
+
+        if (currentFrame >= totalFrames)
         {
-            currentFrame = (currentFrame + 1) % totalFrames;
-            animationTimer = 0.f;
+            currentFrame = 0;
 
-            // SI TERMINA LA ANIMACIÓN DE GOLPE, REGRESA A ESTAR QUIETO (IDLE) AUTOMÁTICAMENTE
-            if (currentAnimation == ATTACK && currentFrame == 0)
+            if (currentAnimation == ATTACK)
             {
                 currentAnimation = IDLE;
                 attacking = false;
             }
         }
-
-        int posX = currentFrame * frameWidth;
-        if (posX + frameWidth > (int)currentTex->getSize().x) {
-            posX = 0;
-        }
-        
-        sprite->setTextureRect(sf::IntRect({posX, 0}, {frameWidth, 150}));
     }
 
-    // Volver a IDLE si se deja de caminar
-    if (currentAnimation == WALK && isGrounded)
-    {
-        static int walkReset = 0;
-        if (++walkReset > 3) {
-            currentAnimation = IDLE;
-            walkReset = 0;
-        }
-    }
+    sprite->setTextureRect(
+        sf::IntRect(
+            {currentFrame * frameWidth, 0},
+            {frameWidth, frameHeight}
+        )
+    );
+   
+
 }
+
 
 sf::FloatRect Fighter::GetBounds() const
 {
-    if (!sprite) return sf::FloatRect();
-    sf::FloatRect bounds = sprite->getGlobalBounds();
-    // Forzamos un tamaño físico real para que la colisión del daño en main.cpp SÍ funcione
-    bounds.size.x = 110.f;
-    bounds.size.y = 150.f;
-    return bounds;
+    if (!sprite)
+        return sf::FloatRect();
+
+    return sprite->getGlobalBounds();
 }
 
 sf::Vector2f Fighter::GetPosition() const
@@ -176,23 +192,11 @@ void Fighter::TakeDamage(int damage)
 
 bool Fighter::IsAlive() const { return health > 0; }
 
-void Fighter::MoveLeft()
-{
-    if (sprite) sprite->move({-5.f, 0.f});
-    if (currentAnimation != ATTACK && isGrounded) currentAnimation = WALK;
-}
-
-void Fighter::MoveRight()
-{
-    if (sprite) sprite->move({5.f, 0.f});
-    if (currentAnimation != ATTACK && isGrounded) currentAnimation = WALK;
-}
-
 void Fighter::Jump()
 {
     if (isGrounded)
     {
-        velocityY = -14.0f;
+        velocityY = -13.5f;
         currentAnimation = JUMP;
         isGrounded = false;
     }
@@ -212,6 +216,7 @@ void Fighter::FaceLeft()
 
 void Fighter::StartAttack()
 {
+    
     if (currentAnimation != ATTACK)
     {
         currentAnimation = ATTACK;
@@ -232,3 +237,14 @@ void Fighter::SetWalk() { currentAnimation = WALK; }
 void Fighter::SetAttack() { currentAnimation = ATTACK; }
 
 Fighter::~Fighter() {}
+void Fighter::Move(float dx)
+{
+    if (sprite)
+        sprite->move({dx, 0.f});
+}
+
+void Fighter::SetPosition(sf::Vector2f pos)
+{
+    if (sprite)
+        sprite->setPosition(pos);
+}

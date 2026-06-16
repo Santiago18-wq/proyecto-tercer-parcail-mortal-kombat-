@@ -171,36 +171,67 @@ int main()
                 }
 
                 // CONTROLES Y MOVIMIENTO
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
-                {
-                    player1.MoveLeft();
-                    if(player1.GetBounds().findIntersection(player2.GetBounds()))
-                        player1.MoveRight();
-                }
+                // Regresar a IDLE cuando no se está moviendo
+if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A) &&
+    !sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D) &&
+    !player1.IsAttacking())
+{
+    player1.SetIdle();
+}
 
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
-                {
-                    player1.MoveRight();
-                    if(player1.GetBounds().findIntersection(player2.GetBounds()))
-                        player1.MoveLeft();
-                }
+if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Left) &&
+    !sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Right) &&
+    !player2.IsAttacking())
+{
+    player2.SetIdle();
+}
 
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::W))
-                    player1.Jump();
+                // ===================== JUGADOR 1 =====================
 
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Left))
-                {
-                    player2.MoveLeft();
-                    if(player1.GetBounds().findIntersection(player2.GetBounds()))
-                        player2.MoveRight();
-                }
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
+{
+    player1.Move(-5.f);
 
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Right))
-                {
-                    player2.MoveRight();
-                    if(player1.GetBounds().findIntersection(player2.GetBounds()))
-                        player2.MoveLeft();
-                }
+    if (player1.GetBounds().findIntersection(player2.GetBounds()).has_value())
+        player1.Move(5.f); // revertir
+}
+
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
+{
+    player1.Move(5.f);
+
+    if (player1.GetBounds().findIntersection(player2.GetBounds()).has_value())
+        player1.Move(-5.f); // revertir
+}
+
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::W))
+{
+    player1.Jump();
+}
+
+
+// ===================== JUGADOR 2 =====================
+
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Left))
+{
+    player2.Move(-5.f);
+
+    if (player1.GetBounds().findIntersection(player2.GetBounds()).has_value())
+        player2.Move(5.f); // revertir
+}
+
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Right))
+{
+    player2.Move(5.f);
+
+    if (player1.GetBounds().findIntersection(player2.GetBounds()).has_value())
+        player2.Move(-5.f); // revertir
+}
+
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Up))
+{
+    player2.Jump();
+}
 
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Up))
                     player2.Jump();
@@ -208,48 +239,67 @@ int main()
                 // DETECCION DE DAÑO Y ATAQUES
                 // DETECCION DE DAÑO Y ATAQUES (ACTUALIZADO A SFML 3)
         // DETECCION DE DAÑO Y ATAQUES
-        sf::FloatRect b1 = player1.GetBounds();
-        sf::FloatRect b2 = player2.GetBounds();
+        //================== ATAQUES Y DAÑO ==================
 
-        // Usando la sintaxis oficial de SFML 3 (.position y .size)
-        float distancia = std::abs(
-            (b1.position.x + b1.size.x / 2.f) - 
-            (b2.position.x + b2.size.x / 2.f)
-        );
+sf::FloatRect b1 = player1.GetBounds();
+sf::FloatRect b2 = player2.GetBounds();
 
-        bool tocando = distancia < 60.f; // Rango de colisión ajustado para el combate
+// Si las cajas se tocan hay posibilidad de pegar
+bool tocando = b1.findIntersection(b2).has_value();
 
-                static bool alreadyHit = false;
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::F))
-                {
-                    if (!alreadyHit && tocando)
-                    {
-                        int damage = 7 + rand() % 2;
-                        player2.TakeDamage(damage);
-                        std::cout << "P1 golpea -> -" << damage << " Vida P2: " << player2.GetHealth() << "\n";
-                        alreadyHit = true;
-                    }
-                }
-                else
-                {
-                    alreadyHit = false;
-                }
+//------------------- JUGADOR 1 -----------------------
 
-                static bool alreadyHit2 = false;
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::RControl))
-                {
-                    if (!alreadyHit2 && tocando)
-                    {
-                        int damage = 7 + rand() % 2;
-                        player1.TakeDamage(damage);
-                        std::cout << "P2 golpea -> -" << damage << " Vida P1: " << player1.GetHealth() << "\n";
-                        alreadyHit2 = true;
-                    }
-                }
-                else
-                {
-                    alreadyHit2 = false;
-                }
+static bool alreadyHit = false;
+
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::F))
+{
+    player1.StartAttack();
+
+    if (!alreadyHit && tocando)
+    {
+        int damage = 7 + rand() % 2;
+        player2.TakeDamage(damage);
+
+        std::cout
+            << "Jugador 1 golpea. Vida P2 = "
+            << player2.GetHealth()
+            << std::endl;
+
+        alreadyHit = true;
+    }
+}
+else
+{
+    alreadyHit = false;
+    player1.StopAttack();
+}
+
+//------------------- JUGADOR 2 -----------------------
+
+static bool alreadyHit2 = false;
+
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::RControl))
+{
+    player2.StartAttack();
+
+    if (!alreadyHit2 && tocando)
+    {
+        int damage = 7 + rand() % 2;
+        player1.TakeDamage(damage);
+
+        std::cout
+            << "Jugador 2 golpea. Vida P1 = "
+            << player1.GetHealth()
+            << std::endl;
+
+        alreadyHit2 = true;
+    }
+}
+else
+{
+    alreadyHit2 = false;
+    player2.StopAttack();
+}
 
                 player1.Update();
                 player2.Update();
@@ -326,14 +376,20 @@ int main()
                     // // Posicionar y centrar correctamente la etiqueta de texto final
         sf::FloatRect textBounds = textoFinal.getLocalBounds();
         
-        // SFML 3 requiere pasar un par de llaves {} para definir la posición del origen
-        textoFinal.setOrigin({textBounds.position.x + textBounds.size.x / 2.0f, 
-                              textBounds.position.y + textBounds.size.y / 2.0f});
+        // 1. Centrar el ORIGEN correctamente
+textoFinal.setOrigin({
+    textBounds.position.x + textBounds.size.x * 0.5f,
+    textBounds.position.y + textBounds.size.y * 0.5f
+});
 
-        textoFinal.setPosition({
-            (1280.f - textBounds.size.x) / 2.f,
-            (720.f - textBounds.size.y) / 2.f
-        });
+// 2. Centrar en la pantalla (mejor usar el tamaño real del window)
+sf::Vector2u winSize = window.getSize();
+
+textoFinal.setPosition({
+    winSize.x * 0.5f,
+    winSize.y * 0.5f
+});
+
                     // Bucle de bloqueo: Congela la escena para visualizar los textos y espera un "Enter"
                     bool esperarEnter = true;
                     while(window.isOpen() && esperarEnter)
