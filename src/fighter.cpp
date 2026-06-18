@@ -11,7 +11,7 @@ Fighter::Fighter(float x, float y, const std::string& characterName)
     currentFrame = 0;
     animationTimer = 0.f;
     
-    // Convertir el nombre a minúsculas para evitar errores de mayúsculas/minúsculas en main.cpp
+
     std::string lowerName = characterName;
     std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
     name = lowerName;
